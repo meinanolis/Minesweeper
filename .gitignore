@@ -1,0 +1,4 @@
+*.sav
+train_data (xpos,ypos,...).csv
+train_data.csv
+*.npy
