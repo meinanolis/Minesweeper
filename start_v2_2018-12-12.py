@@ -444,7 +444,6 @@ class help_pack:
 
 
 
-
 game=game_operatoren(30,7,.3)
 game.Spielumgebung()
 game.newgame()
