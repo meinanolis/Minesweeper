@@ -430,7 +430,7 @@ class help_pack:
 
 
 
-game=game_operatoren(20,10,.3)
+game=game_operatoren(25,7,.3)
 game.Spielumgebung()
 game.newgame()
 
