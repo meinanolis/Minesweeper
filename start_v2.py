@@ -356,13 +356,16 @@ class game_grid:
 			if np.sum(combined_bin_array)<=game.restminen:
 				all_pack.check_consistency(combined_bin_array,True)
 		print('and found '+str(len(all_pack.consistant_bin_arrays))+' possible solutions')
-		game.grid.help_minen=np.ones_like(game.grid.open_fields)
-		for a in all_pack.consistant_bin_arrays:
-			game.grid.help_minen=np.logical_and(game.grid.help_minen,a)
+		#game.grid.help_minen=np.ones_like(game.grid.open_fields)
+		game.grid.help_minen=np.all(all_pack.consistant_bin_arrays,axis=1)
+		#for a in all_pack.consistant_bin_arrays:
+		#	game.grid.help_minen=np.logical_and(game.grid.help_minen,a)
 		game.grid.help_sicher=game.grid.u_rand.copy()
 		game.grid.help_sicher=np.logical_xor(game.grid.help_sicher,game.grid.flagged_felder)
-		for a in all_pack.consistant_bin_arrays:
-			game.grid.help_sicher=np.logical_and(game.grid.help_sicher,1-a)
+		a=np.logical_not(np.any(all_pack.consistant_bin_arrays,axis=0))
+		game.grid.help_sicher=np.logical_and(game.grid.help_sicher,a)
+		#for a in all_pack.consistant_bin_arrays:
+		#	game.grid.help_sicher=np.logical_and(game.grid.help_sicher,1-a)
 		game.LabelLösbar.configure(text=str(int(np.sum(self.help_minen)+np.sum(self.help_sicher))))
 		
 		if 0:	###########plot
@@ -430,7 +433,7 @@ class help_pack:
 
 
 
-game=game_operatoren(25,7,.3)
+game=game_operatoren(7,5,.3)
 game.Spielumgebung()
 game.newgame()
 
