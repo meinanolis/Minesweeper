@@ -439,13 +439,6 @@ class help_pack:
 		return all_bin_array
 			
 
-
-
-
-
-
-
-
 game=game_operatoren(7,3,.3)
 game.Spielumgebung()
 game.newgame()
