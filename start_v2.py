@@ -224,6 +224,18 @@ class game_grid:
 			alle_nachbarn[:,1]+y<self.size_y]).all(0)
 		alle_nachbarn_ohne_rand=np.array([x,y])+alle_nachbarn[gridrandcheck]
 		return alle_nachbarn_ohne_rand
+	def nachbarfelder_array(self, x, y):
+		alle_nachbarn=np.array([[0,1],[0,-1],[1,0],[-1,0],[1,-1],[-1,-1],[-1,1],[1,1]])
+		gridrandcheck=np.array([
+			alle_nachbarn[:,0]+x>=0,
+			alle_nachbarn[:,1]+y>=0,
+			alle_nachbarn[:,0]+x<self.size_x,
+			alle_nachbarn[:,1]+y<self.size_y]).all(0)
+		alle_nachbarn_ohne_rand=np.zeros_like(self.open_fields)
+		pos=np.array([x,y])+alle_nachbarn[gridrandcheck]
+		pos=pos.T
+		alle_nachbarn_ohne_rand[pos[0],pos[1]]=1
+		return alle_nachbarn_ohne_rand
 
 
 	def bunte_nummern(self):
@@ -403,15 +415,13 @@ class help_pack:
 		consist=True
 		for x,y in self.open_nachbarfelder:
 			fieldvalue=game.grid.field[x,y]
-			for nx,ny in game.grid.nachbarfelder(x,y):
-				fieldvalue-=bin_array[nx,ny]
-				fieldvalue-=game.grid.flagged_felder[nx,ny]
-			if fieldvalue and hard:
+			nbf=game.grid.nachbarfelder_array(x,y)
+			minen_array=bin_array+game.grid.flagged_felder
+			n_minen=np.sum(minen_array[nbf==1])
+			if fieldvalue-n_minen and hard:
 				consist=False
-				break
-			if fieldvalue<0:
+			if fieldvalue-n_minen<0:
 				consist=False
-				break
 		if consist:
 			self.consistant_bin_arrays.append(bin_array)
 
