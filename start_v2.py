@@ -214,14 +214,17 @@ class game_grid:
 			bombloc[rand_pos]=1
 			n=np.sum(bombloc)
 		self.bombloc=np.reshape(bombloc,(self.size_x,self.size_y))
-
+	
 	def nachbarfelder(self, x, y):
-		alle_nachbarn=[[0,1],[0,-1],[1,0],[-1,0],[1,-1],[-1,-1],[-1,1],[1,1]]
-		alle_nachbarn_ohne_rand=[]
-		for n in alle_nachbarn:
-			if x+n[0]>=0 and y+n[1]>=0 and x+n[0]<self.size_x and y+n[1]<self.size_y:
-				alle_nachbarn_ohne_rand.append([x+n[0],y+n[1]])
+		alle_nachbarn=np.array([[0,1],[0,-1],[1,0],[-1,0],[1,-1],[-1,-1],[-1,1],[1,1]])
+		gridrandcheck=np.array([
+			alle_nachbarn[:,0]+x>=0,
+			alle_nachbarn[:,1]+y>=0,
+			alle_nachbarn[:,0]+x<self.size_x,
+			alle_nachbarn[:,1]+y<self.size_y]).all(0)
+		alle_nachbarn_ohne_rand=np.array([x,y])+alle_nachbarn[gridrandcheck]
 		return alle_nachbarn_ohne_rand
+
 
 	def bunte_nummern(self):
 		self.field=np.zeros_like(self.open_fields)
@@ -316,13 +319,14 @@ class game_grid:
 
 	def extended_help(self):
 		list_u_rand=np.argwhere(self.u_rand-self.flagged_felder==1)
+		#teile alle u_rand_felder in päckhen ein <------------ make it cleverer. nachbarfelder in eine gruppe
 		pack_size=6 #größe der päckchen
 		help_pack_list=[]
 		while len(list_u_rand)>=pack_size:
 			help_pack_list.append(help_pack(list_u_rand[:pack_size]))
 			list_u_rand=list_u_rand[pack_size:]
 		help_pack_list.append(help_pack(list_u_rand))
-
+		#finde die möglichen Besetzungen heraus
 		for p in help_pack_list:
 			all_bin_array=p.create_bin_vectors()
 			for bin_array in all_bin_array:
@@ -333,10 +337,10 @@ class game_grid:
 		all_pack=help_pack(list_u_rand)
 		N=1
 		N2=1
-		for pack in help_pack_list:
-			pack.N=len(pack.consistant_bin_arrays)
-			N=N*pack.N
-			N2=N2*(2**pack.len)
+		for p in help_pack_list:
+			p.N=len(p.consistant_bin_arrays)
+			N=N*p.N
+			N2=N2*(2**p.len)
 		print('helper needs '+str(N)+'('+str(int(N/N2*100))+'%) instead of '+ str(N2)+' runs')
 		i_vec=np.zeros([len(help_pack_list)])
 		for i in range(N):
@@ -408,7 +412,6 @@ class help_pack:
 			if fieldvalue<0:
 				consist=False
 				break
-
 		if consist:
 			self.consistant_bin_arrays.append(bin_array)
 
